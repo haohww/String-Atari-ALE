@@ -1,1 +1,1 @@
-# atari_ALE
+# atari ALE environment implemented in string
