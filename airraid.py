@@ -4,6 +4,23 @@ import json
 import random
 from llm import get_llm_action
 
+# Tunable params
+RANDOM_MOVE = 0.3
+BOMB_PROBABILITY = 0.2
+# Initial game setup
+grid = """..................
+......E...........
+........E.........
+...E..............
+...........E..E...
+..........E.......
+..................
+..................
+..................
+..S...............
+·····BB····BB·····
+"""
+
 airraid_prompt = """You are a defender in the AirRaid game. Game elements:
 S - Your ship (moves horizontally)
 E - Enemy saucers
@@ -168,7 +185,7 @@ class AirRaidGame:
         """Enemy AI: Move and drop bombs"""
         for enemy in list(self.board["enemies"]):
             # Random movement
-            if random.random() < 0.3:
+            if random.random() < RANDOM_MOVE:
                 dx = random.choice([-1, 0, 1])
                 new_x = enemy[0] + dx
                 if 0 <= new_x < 20 and (new_x, enemy[1]) not in self.board["walls"]:
@@ -176,7 +193,7 @@ class AirRaidGame:
                     self.board["enemies"].append((new_x, enemy[1]))
 
             # Drop bombs
-            if random.random() < 0.2:
+            if random.random() < BOMB_PROBABILITY:
                 self.board["bombs"].append((enemy[0], enemy[1] + 1))
 
     def check_game_over(self):
@@ -210,7 +227,6 @@ class AirRaidGame:
                     building_health=f"Left: {self.building_health['left']}% | Right: {self.building_health['right']}%",
                     last_action=self.last_action,
                 )
-                # print(f"prompt: {prompt}")
 
                 action, reasoning = get_llm_action(prompt, "gemini")
                 print(f"action:{action}, reasoning:{reasoning}")
@@ -249,21 +265,6 @@ class AirRaidGame:
                 if self.game_over:
                     print("Game Over! Final Score:", self.score)
                     break
-
-
-# Initial game setup
-grid = """..................
-......E...........
-........E.........
-...E..............
-...........E..E...
-..........E.......
-..................
-..................
-..................
-..S...............
-·····BB····BB·····
-"""
 
 parser = argparse.ArgumentParser(description="Run AirRaid game")
 parser.add_argument("--output", type=str, default="airraid_log.json")
